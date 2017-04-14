@@ -87,3 +87,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+gaming-rig-cloud.iml
+.idea
