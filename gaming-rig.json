@@ -1,0 +1,70 @@
+{
+  "variables": {
+    "access_key": "",
+    "secret_key": "",
+    "source_ami": "",
+    "region": "eu-west-1",
+    "role": "",
+    "instance_type": "m4.xlarge"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "communicator": "winrm",
+    "region": "{{ user `region` }}",
+    "source_ami": "{{ user `ec2_source_ami` }}",
+    "instance_type": "{{ user `instance_type` }}",
+    "ami_name": "packer-test-{{ timestamp }}",
+    "user_data_file": "files/ec2-userdata.ps1",
+    "winrm_username": "Administrator",
+    "winrm_timeout": "30m",
+    "winrm_port": 5985,
+    "spot_price": "0.7",
+    "access_key": "{{ user `access_key` }}",
+    "secret_key": "{{ user `secret_key` }}",
+    "iam_instance_profile": "{{ user `ROLE` }}",
+    "associate_public_ip_address": true,
+    "ami_users": [ "{{ user `aws_account_id` }}" ],
+    "ami_block_device_mappings": [
+      {
+        "device_name": "/dev/sda1",
+        "volume_type": "gp2",
+        "volume_size": "40",
+        "delete_on_termination": true
+      }],
+    "launch_block_device_mappings": [
+      {
+        "device_name": "/dev/sda1",
+        "volume_type": "gp2",
+        "volume_size": "40",
+        "delete_on_termination": true
+      }],
+    "run_tags": {
+      "Name": "packer-test"
+    },
+    "tags": {
+      "Name": "packer-test"
+    }
+  }],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "{{ template_dir }}/files/NvFBCEnable.exe",
+      "destination": "C:\\NvFBCEnable.exe"
+    },
+    {
+      "type": "powershell",
+      "script": "files/install-nvidia.ps1"
+    },
+    {
+      "type": "windows-restart"
+    },
+    {
+    "type": "powershell",
+    "scripts": [
+      "files/ExecutionPolicy.ps1",
+      "files/Ec2ConfigService.ps1"
+      ]
+    }
+
+  ]
+}
