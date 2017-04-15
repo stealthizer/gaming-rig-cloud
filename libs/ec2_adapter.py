@@ -15,10 +15,16 @@ class Ec2Adapter:
         return password['PasswordData']
 
     def get_ec2_instance_data(self, name):
-        filters = [{
-            'Name': 'tag:Name',
-            'Values': [name]
-        }]
+        filters = [
+            {
+                'Name': 'tag:Name',
+                'Values': [name]
+            },
+            {
+                'Name': 'instance-state-name',
+                'Values': ['running']
+            }
+        ]
         instance_data = []
         instances = self.__get_connection_ec2().describe_instances(Filters=filters)['Reservations']
         for instance in instances:
