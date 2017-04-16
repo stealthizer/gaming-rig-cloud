@@ -62,12 +62,13 @@
       "script": "files/install-nvidia.ps1"
     },
     {
-      "type": "windows-restart"
-    },
-    {
       "type": "file",
       "source": "{{ template_dir }}/files/NvFBCEnable.exe",
       "destination": "C:\\utils\\NvFBCEnable.exe"
+    },
+    {
+      "type": "powershell",
+      "script": "files/install-razer-sound.ps1"
     }
   ]
 }
