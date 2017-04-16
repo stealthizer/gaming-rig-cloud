@@ -47,9 +47,15 @@
   }],
   "provisioners": [
     {
-      "type": "file",
-      "source": "{{ template_dir }}/files/NvFBCEnable.exe",
-      "destination": "C:\\NvFBCEnable.exe"
+      "type": "powershell",
+      "scripts": [
+        "files/ExecutionPolicy.ps1",
+        "files/Ec2ConfigService.ps1"
+      ]
+    },
+    {
+      "type": "powershell",
+      "script": "files/create-utils-directory.ps1"
     },
     {
       "type": "powershell",
@@ -59,12 +65,9 @@
       "type": "windows-restart"
     },
     {
-    "type": "powershell",
-    "scripts": [
-      "files/ExecutionPolicy.ps1",
-      "files/Ec2ConfigService.ps1"
-      ]
+      "type": "file",
+      "source": "{{ template_dir }}/files/NvFBCEnable.exe",
+      "destination": "C:\\utils\\NvFBCEnable.exe"
     }
-
   ]
 }
