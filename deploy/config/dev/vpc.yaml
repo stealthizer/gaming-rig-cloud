@@ -1,0 +1,5 @@
+template_path: templates/vpc.py
+sceptre_user_data:
+  cidr_block: 172.16.0.0/20
+  public_subnet: 172.16.0.0/24
+  private_subnet: 172.16.1.0/24
