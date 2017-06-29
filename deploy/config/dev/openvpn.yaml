@@ -1,0 +1,4 @@
+template_path: templates/openvpn.py
+sceptre_user_data:
+  keyname: devops
+  s3_bucket: lab-delete

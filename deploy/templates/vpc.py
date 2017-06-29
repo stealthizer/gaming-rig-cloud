@@ -1,4 +1,4 @@
-from troposphere import Template, Parameter, Ref, GetAtt, Output
+from troposphere import Template, Parameter, Ref, GetAtt, Output, Export, Sub
 from troposphere.ec2 import VPC, Subnet, InternetGateway, VPCGatewayAttachment, RouteTable, SubnetRouteTableAssociation, Route, EIP, NatGateway
 
 
@@ -112,6 +112,7 @@ class Vpc(object):
     def add_public_net_output(self):
         self.public_net_output = self.template.add_output(Output(
             "PublicSubnet",
+            Export=Export(Sub("${AWS::StackName}-PublicSubnet")),
             Description="Public subnet network range",
             Value=Ref("PublicSubnet"),
         ))
@@ -119,6 +120,7 @@ class Vpc(object):
     def add_private_net_output(self):
         self.private_net_output = self.template.add_output(Output(
             "PrivateSubnet",
+            Export=Export(Sub("${AWS::StackName}-PrivateSubnet")),
             Description="Private subnet network range",
             Value=Ref("PrivateSubnet"),
         ))
@@ -133,6 +135,7 @@ class Vpc(object):
     def add_vpc_output(self):
         self.vpc_output = self.template.add_output(Output(
             "VPCId",
+            Export=Export(Sub("${AWS::StackName}-VPCId")),
             Description="VPCId of vpc",
             Value=Ref("VPC"),
         ))
