@@ -36,7 +36,7 @@ class openVpn(object):
 
     def add_iam_role(self):
         self.iam_role=self.template.add_resource(iam.Role(
-            "DescribeEc2AndStackRole",
+            "s3AcessPolicies",
             Path="/",
             AssumeRolePolicyDocument={"Statement": [{
                 "Effect": "Allow",
@@ -102,23 +102,23 @@ class openVpn(object):
             Metadata=cloudformation.Metadata(
                 cloudformation.Init(
                     cloudformation.InitConfigSets(
-                        ascending=['config1'],
-                        descending=['config1']
+                        ascending=['openvpn'],
+                        descending=['openvpn']
                     ),
-                    config1=cloudformation.InitConfig(
-                        commands={
-                            'test': {
-                                'command': 'echo "$CFNTEST" > text.txt',
-                                'env': {
-                                    'CFNTEST': 'I come from config1.'
-                                },
-                                'cwd': '~'
+                    openvpn=cloudformation.InitConfig(
+                        packages={
+                            "yum": {
+                                "openvpn" : []
                             }
+
                         }
                     )
                 )
             ),
-            UserData=Base64("80"),
+            UserData=Base64(Join('',[
+                'cfn-init -s ', Ref('AWS::StackName'), ' --region eu-west-1'
+                 ' -r OpenVpn -c ascending\n',
+            ])),
             Tags=Tags(
                 Name="vpn-server")
         ))
