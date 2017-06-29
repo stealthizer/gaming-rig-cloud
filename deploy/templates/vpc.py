@@ -1,4 +1,4 @@
-from troposphere import Template, Parameter, Ref, GetAtt, Output, Export, Sub
+from troposphere import Template, Parameter, Ref, GetAtt, Output, Export, Sub, Tags
 from troposphere.ec2 import VPC, Subnet, InternetGateway, VPCGatewayAttachment, RouteTable, SubnetRouteTableAssociation, Route, EIP, NatGateway
 
 
@@ -28,7 +28,11 @@ class Vpc(object):
     def add_vpc(self):
         self.vpc = self.template.add_resource(VPC(
             "VPC",
-            CidrBlock=self.sceptre_user_data["cidr_block"]
+            CidrBlock=self.sceptre_user_data["cidr_block"],
+            EnableDnsHostnames="true",
+            Tags=Tags(
+                Name=self.sceptre_user_data["vpc_name"]
+            )
         ))
 
     def add_public_net(self):
