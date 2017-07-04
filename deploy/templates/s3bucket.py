@@ -8,9 +8,7 @@ class openVpn(object):
         self.sceptre_user_data = sceptre_user_data
         self.template.add_description(
             "This bucket will hold the certificates for openvpn to work")
-        print(self.sceptre_user_data["bucket_name"])
         self.add_s3_bucket()
-        print(Ref(self.s3Bucket))
         self.add_s3_bucket_output()
 
 
@@ -18,6 +16,7 @@ class openVpn(object):
         self.s3Bucket = self.template.add_resource(Bucket(
             self.sceptre_user_data["bucket_name"],
             AccessControl=Private,
+            BucketName=self.sceptre_user_data["bucket_name"],
         ))
 
     def add_s3_bucket_output(self):
