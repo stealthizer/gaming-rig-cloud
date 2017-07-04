@@ -6,7 +6,7 @@ import troposphere.iam as iam
 from troposphere.cloudformation import Init, InitFile, InitFiles, InitConfig, InitService, InitServices
 from troposphere.autoscaling import Metadata
 from troposphere.policies import CreationPolicy, ResourceSignal
-from troposphere.ec2 import NetworkInterfaceProperty
+from troposphere.ec2 import NetworkInterfaceProperty, NetworkInterface
 
 class openVpn(object):
     def __init__(self, sceptre_user_data):
@@ -15,7 +15,9 @@ class openVpn(object):
         self.ami_mapping()
         self.add_security_group()
         self.add_iam_role()
+        self.add_private_network_interface()
         self.add_ec2_instance()
+        self.add_private_network_interface_attachment()
         self.add_output()
 
     def ami_mapping(self):
@@ -112,6 +114,21 @@ class openVpn(object):
             ]
         ))
 
+    def add_private_network_interface(self):
+        self.private_interface = self.template.add_resource(NetworkInterface(
+            "Eth1",
+            Description="eth1",
+            GroupSet=[ Ref(self.securityGroup)],
+            SourceDestCheck=True,
+            SubnetId=ImportValue('deploy-dev-vpc-PrivateSubnet'),
+            Tags=Tags(
+                Name="private_vpn_interface",
+                Interface="eth1",
+            ),
+
+        ))
+
+
 
     def add_ec2_instance(self):
 
@@ -120,8 +137,7 @@ class openVpn(object):
                 'config': InitConfig(
                     packages={
                         'yum': {
-                            'openvpn': [],
-                            'easy-rsa' : []
+                            'openvpn': []
                         }
                     },
                     files=InitFiles({
@@ -130,7 +146,7 @@ class openVpn(object):
                                 'port 1194',
                                 'proto tcp-server',
                                 'dev tun1',
-                                'ifconfig 10.4.0.1 10.4.0.2',
+                                'ifconfig 172.16.1.2 172.16.1.3',
                                 'status server-tcp.log',
                                 'verb 3',
                                 'secret /etc/openvpn/static.key',
@@ -187,15 +203,24 @@ class openVpn(object):
                         'sysvinit': InitServices({
                             'openvpn': InitService(
                                 enabled=True,
-                                ensureRunning=True),
+                                ensureRunning=True,
+                                files=[
+                                    '/etc/openvpn/server.conf'
+                                ]),
                             'cfn-hup': InitService(
                                 enabled=True,
                                 ensureRunning=True,
                                 files=[
                                     '/etc/cfn/cfn-hup.conf',
                                     '/etc/cfn/hooks.d/cfn-auto-reloader.conf'
-                                ])})})}))
-
+                                ])
+                        }
+                        )
+                    }
+                )
+            }
+            )
+        )
 
         self.ec2_instance = self.template.add_resource(ec2.Instance(
             "OpenVpn",
@@ -220,8 +245,8 @@ class openVpn(object):
                         'cd /etc/openvpn\n',
                         'openvpn --genkey --secret static.key\n',
                         'aws s3 cp static.key s3://',ImportValue('deploy-dev-s3bucket-s3bucketname'),'/\n',
-                        'sudo modprobe iptable_nat','/\n',
-                        'echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward','/\n',
+                        'sudo modprobe iptable_nat','\n',
+                        'echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward','\n',
                         'sudo iptables -t nat -A POSTROUTING -s 10.4.0.1/2 -o eth0 -j MASQUERADE','\n',
                         'external_ip=`curl http://169.254.169.254/latest/meta-data/public-ipv4`','\n',
                         'sed -i "s|{{public_ip}}|$external_ip|g" /etc/openvpn/client.ovpn','\n',
@@ -231,9 +256,18 @@ class openVpn(object):
                 ResourceSignal=ResourceSignal(
                     Timeout='PT15M')),
             Tags=Tags(
-                Name="vpn-server")
+                Name="vpn-server"),
         )
         )
+
+    def add_private_network_interface_attachment(self):
+        self.private_network_interface_attachment = self.template.add_resource(ec2.NetworkInterfaceAttachment(
+            "attachment",
+            DeleteOnTermination=True,
+            InstanceId=Ref(self.ec2_instance),
+            NetworkInterfaceId=Ref(self.private_interface),
+            DeviceIndex="1",
+        ))
 
     def add_output(self):
         self.template.add_output([
