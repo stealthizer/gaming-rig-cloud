@@ -17,6 +17,7 @@ class openVpn(object):
             self.sceptre_user_data["bucket_name"],
             AccessControl=Private,
             BucketName=self.sceptre_user_data["bucket_name"],
+            DeletionPolicy="Delete"
         ))
 
     def add_s3_bucket_output(self):
