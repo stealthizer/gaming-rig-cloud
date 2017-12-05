@@ -1,0 +1,3 @@
+template_path: templates/s3bucket.py
+sceptre_user_data:
+  bucket_name: openvpndata
