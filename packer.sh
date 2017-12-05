@@ -12,7 +12,7 @@ else
     ROLE="CreateAmi"
     ACCOUNT_ID="909056075994"
     #SOURCE_AMI="ami-fd77469b" #2008
-    SOURCE_AMI="ami-d3dee9b5" #2012
+    SOURCE_AMI="ami-22a1075b" #2012
 
     CMD_ARGS="-var aws_account_id=$ACCOUNT_ID  -var role=$ROLE -var access_key=$access_key -var secret_key=$secret_key"
     CMD_ARGS="$CMD_ARGS -var ec2_source_ami=$SOURCE_AMI"

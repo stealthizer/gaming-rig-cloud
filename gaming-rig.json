@@ -58,10 +58,6 @@
       "script": "files/create-utils-directory.ps1"
     },
     {
-      "type": "powershell",
-      "script": "files/install-nvidia.ps1"
-    },
-    {
       "type": "file",
       "source": "{{ template_dir }}/files/NvFBCEnable.exe",
       "destination": "C:\\utils\\NvFBCEnable.exe"
