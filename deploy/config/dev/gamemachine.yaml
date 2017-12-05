@@ -1,0 +1,3 @@
+template_path: templates/gamemachine.py
+sceptre_user_data:
+  keyname: devops
